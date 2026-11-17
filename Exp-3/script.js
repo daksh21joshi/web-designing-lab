@@ -1,34 +1,45 @@
-// Select the form, input box, task list and task counter.
-const taskForm = document.getElementById("task-form");
-const taskInput = document.getElementById("task-input");
-const taskList = document.getElementById("task-list");
-const taskCount = document.getElementById("task-count");
+// Get the HTML elements that we need to use.
+const taskForm = document.getElementById("taskForm");
+const taskInput = document.getElementById("taskInput");
+const taskList = document.getElementById("taskList");
+const taskCount = document.getElementById("taskCount");
+const emptyMessage = document.getElementById("emptyMessage");
+const clearCompletedButton = document.getElementById("clearCompleted");
 
-// Update the number of tasks that are not completed.
+// Update the number of tasks and show a message if the list is empty.
 function updateTaskCount() {
-  const remainingTasks = taskList.querySelectorAll("li:not(.completed)").length;
-  taskCount.textContent = remainingTasks + " tasks remaining";
+  const tasks = taskList.querySelectorAll("li");
+  const remainingTasks = taskList.querySelectorAll("li:not(.completed)");
+
+  taskCount.textContent = remainingTasks.length + " tasks left";
+  emptyMessage.style.display = tasks.length === 0 ? "block" : "none";
 }
 
 // Add a new task to the list.
 function addTask(taskText) {
   const listItem = document.createElement("li");
+
+  // Checkbox is used to mark a task as completed.
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
+  checkbox.setAttribute("aria-label", "Mark task as completed");
 
+  // This span displays the task text.
   const taskName = document.createElement("span");
   taskName.textContent = taskText;
 
+  // Delete button removes this task from the list.
   const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
   deleteButton.textContent = "Delete";
   deleteButton.className = "delete-button";
 
-  checkbox.addEventListener("change", function () {
+  checkbox.addEventListener("change", function() {
     listItem.classList.toggle("completed", checkbox.checked);
     updateTaskCount();
   });
 
-  deleteButton.addEventListener("click", function () {
+  deleteButton.addEventListener("click", function() {
     listItem.remove();
     updateTaskCount();
   });
@@ -37,16 +48,17 @@ function addTask(taskText) {
   listItem.appendChild(taskName);
   listItem.appendChild(deleteButton);
   taskList.appendChild(listItem);
+
   updateTaskCount();
 }
 
-// Run this code when the form is submitted.
-taskForm.addEventListener("submit", function (event) {
+// Listen for the form submit event when Add Task is clicked.
+taskForm.addEventListener("submit", function(event) {
   event.preventDefault();
+
   const taskText = taskInput.value.trim();
 
   if (taskText === "") {
-    alert("Please enter a task.");
     return;
   }
 
@@ -54,3 +66,17 @@ taskForm.addEventListener("submit", function (event) {
   taskInput.value = "";
   taskInput.focus();
 });
+
+// Remove all tasks that have been marked as completed.
+clearCompletedButton.addEventListener("click", function() {
+  const completedTasks = taskList.querySelectorAll("li.completed");
+
+  completedTasks.forEach(function(task) {
+    task.remove();
+  });
+
+  updateTaskCount();
+});
+
+// Show the correct task count when the page first opens.
+updateTaskCount();
